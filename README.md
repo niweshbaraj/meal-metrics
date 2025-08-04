@@ -63,7 +63,7 @@ pip install -r requirements.txt
 3. **Start the backend server**
 ```bash
 # Using uvicorn directly
-uvicorn app.main:app --reload
+uvicorn api.main:app --reload
 
 # Or if using the main.py in root
 python main.py
@@ -191,7 +191,54 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Production (Render.com)
-The project includes `render.yaml` for easy deployment on Render.com
+
+#### Option 1: One-Click Deploy (Recommended)
+The project includes `render.yaml` for easy one-click deployment:
+
+1. **Connect Repository**
+   - Go to [Render Dashboard](https://dashboard.render.com/)
+   - Click "New +" → "Blueprint"
+   - Connect your GitHub repository (`niweshbaraj/meal-metrics`)
+   - Render will automatically detect the `render.yaml` file
+
+2. **Deploy**
+   - Click "Apply" to deploy
+   - Render will automatically build and start your application
+   - Your app will be available at: `https://meal-metrics-api.onrender.com`
+
+#### Option 2: Manual Setup
+1. **Create Web Service**
+   - Go to [Render Dashboard](https://dashboard.render.com/)
+   - Click "New +" → "Web Service"
+   - Connect your GitHub repository
+
+2. **Configure Service**
+   ```
+   Name: meal-metrics-api
+   Environment: Python
+   Build Command: pip install -r requirements.txt
+   Start Command: uvicorn api.main:app --host 0.0.0.0 --port 10000
+   ```
+
+3. **Environment Variables**
+   ```
+   PORT=10000
+   ```
+
+4. **Deploy**
+   - Click "Create Web Service"
+   - Render will build and deploy your application
+
+#### Frontend Deployment
+Since the frontend is static files, you can:
+1. **Host on same service**: The FastAPI app can serve static files
+2. **Separate static site**: Deploy frontend separately on Render as a static site
+3. **Use GitHub Pages**: Host frontend on GitHub Pages pointing to your Render API
+
+#### Access Your Deployed App
+- **API**: `https://your-app-name.onrender.com`
+- **API Docs**: `https://your-app-name.onrender.com/docs`
+- **Frontend**: `https://your-app-name.onrender.com/frontend/` (if serving static files)
 
 ## 🛠️ Development
 
