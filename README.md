@@ -56,15 +56,37 @@ meal-metrics/
 └── README.md             # This file
 ```
 
-## 🔐 Authentication
+## 📸 Application Screenshots
 
-The API uses key-based authentication:
-- **User API Key**: `SECRET_API_KEY`
-- **Admin API Key**: `ADMIN_API_KEY`
+### Backend API Documentation
+
+**Interactive API Documentation (`/docs`)**
+![API Documentation](image.png)
+
+**Nutrition Status Endpoint Response**
+![Nutrition Status API](image-6.png)
+
+### Frontend User Interface
+
+**User Registration Page**
+![User Registration](image-1.png)
+
+**Meal Logging Interface**
+![Log Meal](image-2.png)
+
+**Nutrition Status Dashboard**
+![Nutrition Status](image-3.png)
+
+**Meal History View**
+![Meal History](image-4.png)
+
+**Webhook Testing Interface**
+![Webhook Integration](image-5.png)
+
+## 🔐 Authentication
 
 Headers required for API calls:
 ```bash
-X-API-Key: SECRET_API_KEY
 user-id: your_user_id
 ```
 
