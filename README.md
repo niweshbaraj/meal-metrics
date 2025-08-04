@@ -2,6 +2,14 @@
 
 A comprehensive web application for tracking meals, calculating BMR (Basal Metabolic Rate), and monitoring nutritional intake. Built with FastAPI backend and vanilla JavaScript frontend.
 
+## 🌐 Live Demo
+
+🚀 **Try the app now:** [https://meal-metrics-api.onrender.com](https://meal-metrics-api.onrender.com)
+
+- **🎯 Frontend App**: [Launch Application](https://meal-metrics-api.onrender.com/frontend/index.html#register)
+- **📖 API Documentation**: [Interactive API Docs](https://meal-metrics-api.onrender.com/docs)
+- **📝 ReDoc**: [Alternative API Docs](https://meal-metrics-api.onrender.com/redoc)
+
 ## ✨ Features
 
 - **User Management**: Register users with profile data and BMR calculation
@@ -236,9 +244,11 @@ Since the frontend is static files, you can:
 3. **Use GitHub Pages**: Host frontend on GitHub Pages pointing to your Render API
 
 #### Access Your Deployed App
-- **API**: `https://your-app-name.onrender.com`
-- **API Docs**: `https://your-app-name.onrender.com/docs`
-- **Frontend**: `https://your-app-name.onrender.com/frontend/` (if serving static files)
+- **🌐 Live Application**: [https://meal-metrics-api.onrender.com](https://meal-metrics-api.onrender.com)
+- **🎯 Frontend**: [https://meal-metrics-api.onrender.com/frontend/index.html](https://meal-metrics-api.onrender.com/frontend/index.html)
+- **📖 API Documentation**: [https://meal-metrics-api.onrender.com/docs](https://meal-metrics-api.onrender.com/docs)
+- **📝 ReDoc**: [https://meal-metrics-api.onrender.com/redoc](https://meal-metrics-api.onrender.com/redoc)
+- **🔗 API Base URL**: `https://meal-metrics-api.onrender.com/api/v1`
 
 ## 🛠️ Development
 
