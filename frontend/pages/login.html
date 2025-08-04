@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMR Tracker - Login</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🍽️ BMR Tracker Login</h1>
+            <p>Please login to access your nutrition tracking dashboard</p>
+        </header>
+
+        <!-- Login Form -->
+        <main class="content">
+            <div class="login-page">
+                <div class="card">
+                    <h3>Login to Your Account</h3>
+                    
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="userSelect">Select Your Account:</label>
+                            <select id="userSelect" name="userSelect" required>
+                                <option value="">Choose your account...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="adminLogin" name="adminLogin">
+                                Login as Administrator
+                            </label>
+                        </div>
+
+                        <div class="login-actions">
+                            <button type="button" class="btn primary" onclick="performLogin()">
+                                🔐 Login
+                            </button>
+                            <button type="button" class="btn secondary" onclick="goToRegister()">
+                                👤 Register New Account
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="loginResult" class="result" style="display: none;"></div>
+                </div>
+
+                <!-- Quick Access -->
+                <div class="card">
+                    <h4>Quick Access</h4>
+                    <p>Don't have an account? Register now to start tracking your nutrition!</p>
+                    <div class="quick-actions">
+                        <a href="register.html" class="btn secondary">Create Account</a>
+                        <a href="index.html" class="btn secondary">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        // Login page specific JavaScript
+        let availableUsers = [];
+
+        async function loadUsers() {
+            try {
+                console.log('Loading users...');
+                const response = await api.getPublicUsers();
+                console.log('API Response:', response); // Debug log
+                
+                let users = [];
+                if (response.success && response.data && response.data.users) {
+                    users = response.data.users;
+                } else if (response.users) {
+                    users = response.users;
+                } else {
+                    console.error('Unexpected response structure:', response);
+                }
+                
+                availableUsers = users;
+                
+                const userSelect = document.getElementById('userSelect');
+                userSelect.innerHTML = '<option value="">Choose your account...</option>';
+                
+                availableUsers.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.userId;
+                    option.textContent = `${user.name} (${user.userId})`;
+                    userSelect.appendChild(option);
+                });
+
+                if (availableUsers.length === 0) {
+                    userSelect.innerHTML = '<option value="">No users found - Register first</option>';
+                }
+
+                console.log('Loaded users:', availableUsers);
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showResult('No users available. Please register first.', 'error');
+            }
+        }
+
+        async function performLogin() {
+            const selectedUserId = document.getElementById('userSelect').value;
+            const isAdmin = document.getElementById('adminLogin').checked;
+            
+            console.log('Login attempt:', { selectedUserId, isAdmin });
+
+            if (!isAdmin && !selectedUserId) {
+                showResult('Please select an account to login with.', 'error');
+                return;
+            }
+
+            try {
+                let loginData;
+                
+                if (isAdmin) {
+                    console.log('Admin login selected');
+                    // Admin login
+                    loginData = {
+                        userId: 'admin',
+                        name: 'Administrator',
+                        role: 'admin',
+                        loginTime: new Date().toISOString()
+                    };
+                } else {
+                    console.log('User login selected for:', selectedUserId);
+                    // Regular user login
+                    const selectedUser = availableUsers.find(u => u.userId === selectedUserId);
+                    if (!selectedUser) {
+                        throw new Error('Selected user not found');
+                    }
+
+                    // Include all user data in login info
+                    loginData = {
+                        userId: selectedUserId,
+                        name: selectedUser.name,
+                        role: 'user',
+                        // Include other user profile data for BMR calculation
+                        height: selectedUser.height,
+                        weight: selectedUser.weight,
+                        age: selectedUser.age,
+                        gender: selectedUser.gender,
+                        activity_level: selectedUser.activity_level,
+                        goal: selectedUser.goal,
+                        loginTime: new Date().toISOString()
+                    };
+                }
+
+                // Store login data
+                localStorage.setItem('bmr_tracker_login', JSON.stringify(loginData));
+                console.log('Login data stored:', loginData);
+                
+                // Update global user state
+                window.currentUser = {
+                    userId: loginData.userId,
+                    role: loginData.role
+                };
+
+                showResult(`Login successful! Redirecting to ${loginData.role === 'admin' ? 'admin panel' : 'dashboard'}...`, 'success');
+                
+                console.log('About to redirect to:', loginData.role === 'admin' ? 'admin.html' : 'dashboard.html');
+                
+                // Redirect based on role
+                setTimeout(() => {
+                    if (loginData.role === 'admin') {
+                        console.log('Redirecting to admin panel');
+                        window.location.href = 'admin.html';
+                    } else {
+                        console.log('Redirecting to dashboard');
+                        window.location.href = 'dashboard.html';
+                    }
+                }, 1500);
+                
+            } catch (error) {
+                showResult(`Login failed: ${error.message}`, 'error');
+            }
+        }
+
+        function goToRegister() {
+            window.location.href = 'register.html';
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+
+        // Load users when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

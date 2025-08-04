@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMR Tracker - Dashboard</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🍽️ Your Nutrition Dashboard</h1>
+            <p id="welcomeMessage">Welcome back!</p>
+            <div class="user-info">
+                <span id="currentUserInfo"></span>
+                <button class="btn secondary" onclick="goToHome()">🏠 Back to Home</button>
+                <button class="btn secondary" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-item active" data-page="overview">📊 Overview</button>
+            <button class="nav-item" data-page="bmr">💪 BMR Calculator</button>
+            <button class="nav-item" data-page="meals">🍽️ Log Meals</button>
+            <button class="nav-item" data-page="nutrition">📈 Nutrition Status</button>
+            <button class="nav-item" data-page="history">📋 Meal History</button>
+            <button class="nav-item" data-page="webhook">🔗 Webhook Test</button>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="content">
+            <!-- Overview Page -->
+            <div id="overview" class="page active">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h5>Your BMR</h5>
+                        <p class="stat-value" id="userBMR">Loading...</p>
+                        <p class="stat-label">calories/day</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h5>Today's Meals</h5>
+                        <p class="stat-value" id="todayMeals">Loading...</p>
+                        <p class="stat-label">meals logged</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h5>Today's Calories</h5>
+                        <p class="stat-value" id="todayCalories">Loading...</p>
+                        <p class="stat-label">calories consumed</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h5>Remaining Calories</h5>
+                        <p class="stat-value" id="remainingCalories">Loading...</p>
+                        <p class="stat-label">to reach goal</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-actions">
+                    <button class="btn primary" onclick="showPage('meals')">🍽️ Log New Meal</button>
+                    <button class="btn secondary" onclick="showPage('nutrition')">📈 View Nutrition</button>
+                    <button class="btn secondary" onclick="showPage('history')">📋 Meal History</button>
+                </div>
+            </div>
+
+            <!-- BMR Calculator Page -->
+            <div id="bmr" class="page">
+                <div class="card">
+                    <h3>BMR Calculator</h3>
+                    <div class="info-box">
+                        <h4>What is BMR?</h4>
+                        <p>Basal Metabolic Rate (BMR) is the number of calories your body needs while at rest to maintain basic functions like breathing, circulation, and cell production.</p>
+                        <p>Your BMR is calculated based on your age, gender, height, and weight using the Mifflin-St Jeor Equation, which is considered one of the most accurate formulas.</p>
+                        <h4>Why is BMR important?</h4>
+                        <p>Your BMR forms the foundation of your daily calorie needs. By knowing your BMR, you can:</p>
+                        <ul>
+                            <li>Set appropriate calorie targets for weight management</li>
+                            <li>Track your remaining calories for the day</li>
+                            <li>Make informed decisions about your nutrition</li>
+                        </ul>
+                    </div>
+                    <div id="bmrResult" class="result" style="display: none;"></div>
+                    <button class="btn primary" onclick="calculateUserBMR()">Calculate My BMR</button>
+                </div>
+            </div>
+
+            <!-- Meal Logging Page -->
+            <div id="meals" class="page">
+                <div class="card">
+                    <h3>Log Your Meal</h3>
+                    <form id="mealForm">
+                        <div class="form-group">
+                            <label for="mealType">Meal Type:</label>
+                            <select id="mealType" name="meal" required>
+                                <option value="breakfast">Breakfast</option>
+                                <option value="lunch">Lunch</option>
+                                <option value="dinner">Dinner</option>
+                                <option value="snack">Snack</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="foodItems">Food Items:</label>
+                            <textarea id="foodItems" name="items" placeholder="Enter food items separated by commas (e.g., rice, chicken breast, broccoli)" required></textarea>
+                            <small>Available foods: <a href="#" onclick="showAvailableFoods()">View all foods</a></small>
+                        </div>
+
+                        <button type="button" class="btn primary" onclick="logMeal()">Log Meal</button>
+                    </form>
+                    <div id="mealResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Nutrition Status Page -->
+            <div id="nutrition" class="page">
+                <div class="card">
+                    <h3>Nutrition Status</h3>
+                    <div class="form-group">
+                        <label for="statusDate">Date:</label>
+                        <input type="date" id="statusDate" name="statusDate">
+                        <button class="btn primary" onclick="getNutritionStatus()">Get Status</button>
+                    </div>
+                    <div id="nutritionResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Meal History Page -->
+            <div id="history" class="page">
+                <div class="card">
+                    <h3>Your Meal History</h3>
+                    <div class="form-group">
+                        <label for="historyDate">Date:</label>
+                        <input type="date" id="historyDate" name="historyDate">
+                        <button class="btn primary" onclick="getMealHistory()">Get History</button>
+                    </div>
+                    <div id="historyResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Webhook Test Page -->
+            <div id="webhook" class="page">
+                <div class="card">
+                    <h3>🔗 Webhook Meal Logging Test</h3>
+                    <p>Test the webhook endpoint that simulates WhatsApp/Google Chat meal logging.</p>
+                    <div class="form-group">
+                        <label for="webhookMessage">Webhook Message</label>
+                        <textarea id="webhookMessage" rows="3" placeholder="log lunch: Pasta, Almonds" required></textarea>
+                        <small>Example format: "log [meal]: [food1], [food2], ..."</small>
+                    </div>
+                    <button type="button" class="btn primary" onclick="sendWebhookTest()">
+                        🔗 Send Webhook
+                    </button>
+                    <div id="webhookResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        // Dashboard specific JavaScript
+        let currentUser = null;
+
+        // Check if user is logged in
+        function checkAuth() {
+            const loginData = localStorage.getItem('bmr_tracker_login');
+            if (!loginData) {
+                alert('Please login first');
+                window.location.href = 'login.html';
+                return false;
+            }
+
+            currentUser = JSON.parse(loginData);
+            
+            // Set global user state for API calls
+            window.currentUser = {
+                userId: currentUser.userId,
+                role: currentUser.role
+            };
+
+            // Update UI
+            document.getElementById('welcomeMessage').textContent = `Welcome back, ${currentUser.name}!`;
+            document.getElementById('currentUserInfo').textContent = `Logged in as: ${currentUser.name} (${currentUser.role})`;
+
+            return true;
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            if (!currentUser) return;
+
+            try {
+                // Define variables at the top level so they can be shared across all sections
+                const today = new Date().toISOString().split('T')[0];
+                let userBMR = null;
+                let todayCalories = 0;
+                
+                // Load BMR with error handling and logging for debugging
+                try {
+                    const bmrResponse = await api.getUserBMR(currentUser.userId);
+                    console.log('BMR Response:', bmrResponse);
+                    
+                    if (bmrResponse.success && bmrResponse.data && typeof bmrResponse.data.bmr === 'number') {
+                        userBMR = bmrResponse.data.bmr;
+                        document.getElementById('userBMR').textContent = Math.round(userBMR);
+                    } else if (bmrResponse && typeof bmrResponse.bmr === 'number') {
+                        userBMR = bmrResponse.bmr;
+                        document.getElementById('userBMR').textContent = Math.round(userBMR);
+                    } else {
+                        console.error('BMR data missing or invalid:', bmrResponse);
+                        document.getElementById('userBMR').textContent = 'N/A';
+                    }
+                } catch (bmrError) {
+                    console.error('Error loading BMR:', bmrError);
+                    document.getElementById('userBMR').textContent = 'N/A';
+                }
+
+                // Load today's meals
+                try {
+                    console.log('Loading meals for user:', currentUser.userId, 'date:', today);
+                    let mealsResponse = await api.getUserMeals(currentUser.userId, today);
+                    console.log('Full Meals Response:', JSON.stringify(mealsResponse, null, 2));
+                    
+                    let mealCount = 0;
+                    if (mealsResponse.success && mealsResponse.data) {
+                        const mealsData = mealsResponse.data;
+                        console.log('Meals Data:', JSON.stringify(mealsData, null, 2));
+                        
+                        if (mealsData.meals && Array.isArray(mealsData.meals)) {
+                            mealCount = mealsData.meals.length;
+                            console.log('Found meals array with length:', mealCount);
+                            
+                            // If no meals today, try getting all meals
+                            if (mealCount === 0) {
+                                console.log('No meals found for today, trying all meals...');
+                                const allMealsResponse = await api.getUserMeals(currentUser.userId);
+                                if (allMealsResponse.success && allMealsResponse.data && allMealsResponse.data.meals) {
+                                    mealCount = allMealsResponse.data.meals.length;
+                                    console.log('Total meals found:', mealCount);
+                                }
+                            }
+                        } else if (mealsData.total_meals) {
+                            mealCount = mealsData.total_meals;
+                            console.log('Found total_meals:', mealCount);
+                        } else {
+                            console.log('No meals found in expected format');
+                        }
+                    } else {
+                        console.log('API call failed or no data:', mealsResponse);
+                    }
+                    
+                    document.getElementById('todayMeals').textContent = mealCount;
+                } catch (mealsError) {
+                    console.error('Error loading meals:', mealsError);
+                    document.getElementById('todayMeals').textContent = '0';
+                }
+
+                // Load nutrition status
+                try {
+                    console.log('Loading nutrition for user:', currentUser.userId, 'date:', today);
+                    let nutritionResponse = await api.getNutritionStatus(currentUser.userId, today);
+                    console.log('Full Nutrition Response:', JSON.stringify(nutritionResponse, null, 2));
+                    
+                    let calories = 0;
+                    if (nutritionResponse.success && nutritionResponse.data) {
+                        const nutritionData = nutritionResponse.data;
+                        console.log('Nutrition Data:', JSON.stringify(nutritionData, null, 2));
+                        
+                        if (nutritionData.nutrient_intake && typeof nutritionData.nutrient_intake.calories === 'number') {
+                            calories = Math.round(nutritionData.nutrient_intake.calories);
+                            console.log('Found calories in nutrient_intake:', calories);
+                            
+                            // If no calories today, try getting all-time nutrition
+                            if (calories === 0) {
+                                console.log('No calories found for today, trying all-time nutrition...');
+                                const allNutritionResponse = await api.getNutritionStatus(currentUser.userId);
+                                if (allNutritionResponse.success && allNutritionResponse.data && allNutritionResponse.data.nutrient_intake) {
+                                    calories = Math.round(allNutritionResponse.data.nutrient_intake.calories || 0);
+                                    console.log('Total calories found:', calories);
+                                }
+                            }
+                        } else if (nutritionData.total_nutrition && typeof nutritionData.total_nutrition.calories === 'number') {
+                            calories = Math.round(nutritionData.total_nutrition.calories);
+                            console.log('Found calories in total_nutrition:', calories);
+                        } else if (typeof nutritionData.calories === 'number') {
+                            calories = Math.round(nutritionData.calories);
+                            console.log('Found direct calories:', calories);
+                        } else {
+                            console.log('No calories found in expected format');
+                        }
+                    } else {
+                        console.log('Nutrition API call failed or no data:', nutritionResponse);
+                    }
+                    
+                    todayCalories = calories;
+                    document.getElementById('todayCalories').textContent = todayCalories;
+                } catch (nutritionError) {
+                    console.error('Error loading nutrition status:', nutritionError);
+                    document.getElementById('todayCalories').textContent = '0';
+                }
+
+                // Calculate remaining calories with robust error handling
+                try {
+                    // If BMR was successfully loaded above, use that value
+                    if (userBMR !== null) {
+                        console.log('Using fetched BMR value:', userBMR);
+                    } else {
+                        // Try one more direct API call to get BMR (most reliable source)
+                        try {
+                            const freshBmrResponse = await api.getUserBMR(currentUser.userId);
+                            if (freshBmrResponse && 
+                                ((freshBmrResponse.data && typeof freshBmrResponse.data.bmr === 'number') || 
+                                 (typeof freshBmrResponse.bmr === 'number'))) {
+                                
+                                userBMR = freshBmrResponse.data ? freshBmrResponse.data.bmr : freshBmrResponse.bmr;
+                                console.log('Retrieved fresh BMR from API call:', userBMR);
+                            }
+                        } catch (freshBmrError) {
+                            console.error('Failed to get fresh BMR:', freshBmrError);
+                        }
+                        
+                        // If still no BMR, try to calculate it from user data
+                        if (userBMR === null) {
+                            const userInfo = JSON.parse(localStorage.getItem('bmr_tracker_login'));
+                            
+                            if (userInfo && userInfo.height && userInfo.weight && userInfo.age && userInfo.gender) {
+                                userBMR = calculateBMR(userInfo.weight, userInfo.height, userInfo.age, userInfo.gender);
+                                console.log('Calculated BMR from user data:', userBMR);
+                            } else {
+                                // Default fallback only if we have no other option
+                                userBMR = 2000;
+                                console.log('Using default BMR fallback value');
+                            }
+                        }
+                    }
+                    
+                    console.log('Final BMR for calories calculation:', userBMR);
+                    console.log('Today calories:', todayCalories);
+                    
+                    const remaining = Math.max(0, userBMR - todayCalories);
+                    document.getElementById('remainingCalories').textContent = Math.round(remaining);
+                } catch (caloriesError) {
+                    console.error('Error calculating remaining calories:', caloriesError);
+                    document.getElementById('remainingCalories').textContent = 'N/A';
+                }
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Dashboard functions
+        async function calculateUserBMR() {
+            try {
+                const response = await api.getUserBMR(currentUser.userId);
+                showResult('bmrResult', response.data || response, false);
+            } catch (error) {
+                showResult('bmrResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function logMeal() {
+            try {
+                const mealData = {
+                    userId: currentUser.userId,
+                    meal: document.getElementById('mealType').value,
+                    items: document.getElementById('foodItems').value.split(',').map(item => item.trim())
+                };
+
+                const response = await api.logMeal(mealData);
+
+                if (response.success) {
+                    showResult('mealResult', 'Meal has been successfully logged!', false);
+                } else {
+                    showResult('mealResult', 'Failed to log the meal. Please try again.', true);
+                }
+
+                // Refresh dashboard
+                loadDashboard();
+
+                // Clear form
+                document.getElementById('mealForm').reset();
+            } catch (error) {
+                showResult('mealResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function getNutritionStatus() {
+            try {
+                const date = document.getElementById('statusDate').value;
+                const response = await api.getNutritionStatus(currentUser.userId, date);
+
+                if (response.success) {
+                    showResult('nutritionResult', {
+                        bmr: response.data.bmr,
+                        nutrientIntake: response.data.nutrient_intake,
+                        recommendations: response.data.recommendations
+                    }, false);
+                } else {
+                    showResult('nutritionResult', response.data, true);
+                }
+            } catch (error) {
+                showResult('nutritionResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function getMealHistory() {
+            try {
+                const date = document.getElementById('historyDate').value;
+                const response = await api.getUserMeals(currentUser.userId, date);
+
+                if (response.success) {
+                    showResult('historyResult', {
+                        meals: response.data.meals,
+                        totalNutrition: response.data.total_nutrition
+                    }, false);
+                } else {
+                    showResult('historyResult', response.data, true);
+                }
+            } catch (error) {
+                showResult('historyResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function showAvailableFoods() {
+            try {
+                const response = await api.getFoods();
+                console.log('Foods API response:', response); // Debug log
+                
+                let foods = {};
+                if (response.success && response.data && response.data.foods) {
+                    foods = response.data.foods;
+                } else if (response.foods) {
+                    foods = response.foods;
+                } else {
+                    console.error('Unexpected foods response structure:', response);
+                    alert('Error: Unable to load foods data');
+                    return;
+                }
+                
+                // Create a modal to show foods in a better way
+                const modalContent = document.createElement('div');
+                modalContent.className = 'modal-content';
+                
+                // Create a table for foods and their nutrition data
+                let tableHtml = `
+                    <h3>Available Foods Database (${Object.keys(foods).length} items)</h3>
+                    <table class="food-table">
+                        <thead>
+                            <tr>
+                                <th>Food Name</th>
+                                <th>Calories</th>
+                                <th>Protein (g)</th>
+                                <th>Carbs (g)</th>
+                                <th>Fiber (g)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                // Add each food to the table
+                Object.keys(foods).sort().forEach(foodName => {
+                    const food = foods[foodName];
+                    tableHtml += `
+                        <tr>
+                            <td>${foodName}</td>
+                            <td>${food.calories}</td>
+                            <td>${food.protein}</td>
+                            <td>${food.carbs}</td>
+                            <td>${food.fiber}</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHtml += `
+                        </tbody>
+                    </table>
+                    <button onclick="closeModal()" class="btn primary">Close</button>
+                `;
+                
+                // Create or find the modal container
+                let modalContainer = document.getElementById('foodModal');
+                if (!modalContainer) {
+                    modalContainer = document.createElement('div');
+                    modalContainer.id = 'foodModal';
+                    modalContainer.className = 'modal';
+                    document.body.appendChild(modalContainer);
+                }
+                
+                // Create a proper modal structure with close button
+                const modalStructure = `
+                    <div class="modal-content">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>Available Foods Database (${Object.keys(foods).length} items)</h3>
+                            <button onclick="closeModal()" style="border: none; background: transparent; font-size: 20px; cursor: pointer;">&times;</button>
+                        </div>
+                        
+                        <div style="max-height: 60vh; overflow-y: auto; border-radius: 8px; border: 1px solid #eee;">
+                            <table class="food-table">
+                                <thead>
+                                    <tr>
+                                        <th>Food Name</th>
+                                        <th>Calories</th>
+                                        <th>Protein (g)</th>
+                                        <th>Carbs (g)</th>
+                                        <th>Fiber (g)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Object.keys(foods).sort().map(foodName => {
+                                        const food = foods[foodName];
+                                        return `
+                                            <tr>
+                                                <td>${foodName}</td>
+                                                <td>${food.calories}</td>
+                                                <td>${food.protein}</td>
+                                                <td>${food.carbs}</td>
+                                                <td>${food.fiber}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button onclick="closeModal()" class="btn primary">Close</button>
+                        </div>
+                    </div>
+                `;
+                
+                modalContainer.innerHTML = modalStructure;
+                modalContainer.style.display = 'block';
+                
+                // Add modal close function if it doesn't exist
+                if (!window.closeModal) {
+                    window.closeModal = function() {
+                        document.getElementById('foodModal').style.display = 'none';
+                    };
+                    
+                    // Also close when clicking outside the modal
+                    window.addEventListener('click', function(event) {
+                        if (event.target === modalContainer) {
+                            closeModal();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading foods:', error);
+                alert('Error loading foods: ' + error.message);
+            }
+        }
+
+        async function sendWebhookTest() {
+            const message = document.getElementById('webhookMessage').value;
+            if (!message.trim()) {
+                showResult('webhookResult', 'Please enter a webhook message', true);
+                return;
+            }
+
+            try {
+                const webhookData = {
+                    userId: window.currentUser.userId,
+                    message: message.trim()
+                };
+
+                const response = await api.sendWebhook(webhookData);
+                
+                // Check new webhook response format
+                if (response.success && response.data && response.data.status === 'success') {
+                    showResult('webhookResult', {
+                        message: response.data.message || 'Webhook sent successfully!',
+                        meal_details: response.data.result || {}
+                    }, false);
+                } else if (response.data && response.data.status === 'error') {
+                    showResult('webhookResult', {
+                        error: response.data.message || 'Webhook processing failed'
+                    }, true);
+                } else {
+                    showResult('webhookResult', 'Webhook response format error', true);
+                }
+            } catch (error) {
+                console.error('Error sending webhook:', error);
+                showResult('webhookResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('bmr_tracker_login');
+            window.location.href = 'login.html';
+        }
+
+        function goToHome() {
+            window.location.href = '../index.html';
+        }
+
+        function showResult(elementId, data, isError) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${isError ? 'error' : 'success'}`;
+            
+            if (typeof data === 'object') {
+                resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                resultDiv.textContent = data;
+            }
+        }
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Add active class to corresponding nav item
+            const navItem = document.querySelector(`[data-page="${pageId}"]`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            if (checkAuth()) {
+                loadDashboard();
+                
+                // Set today's date as default
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('statusDate').value = today;
+                document.getElementById('historyDate').value = today;
+                
+                // Ensure Overview page is shown by default
+                showPage('overview');
+            }
+
+            // Add nav click handlers
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const pageId = item.getAttribute('data-page');
+                    showPage(pageId);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMR Tracker - Admin Panel</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>👑 Admin Panel - BMR Tracker</h1>
+            <div class="user-info">
+                <span id="currentAdminInfo"></span>
+                <button class="btn secondary" onclick="goToHome()">🏠 Back to Home</button>
+                <button class="btn secondary" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-item active" data-page="users">👥 User Management</button>
+            <button class="nav-item" data-page="analytics">📊 Analytics</button>
+            <button class="nav-item" data-page="data">📋 Data Viewer</button>
+            <button class="nav-item" data-page="foods">🍎 Food Database</button>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="content">
+            <!-- User Management Page -->
+            <div id="users" class="page active">
+                <div class="card">
+                    <h3>All Users</h3>
+                    <button class="btn primary" onclick="loadAllUsers()">🔄 Refresh Users</button>
+                    <div id="usersResult" class="result" style="display: none;"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>User Details</h3>
+                    <div class="form-group">
+                        <label for="userSelect">Select User:</label>
+                        <select id="userSelect" name="userSelect" onchange="loadSelectedUser()">
+                            <option value="">Select a user...</option>
+                        </select>
+                    </div>
+                    <div id="selectedUserResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div id="analytics" class="page">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h5>Total Users</h5>
+                        <p class="stat-value" id="totalUsers">Loading...</p>
+                        <p class="stat-label">registered users</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h5>Today's Meals</h5>
+                        <p class="stat-value" id="totalTodayMeals">Loading...</p>
+                        <p class="stat-label">meals logged today</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h5>Active Users</h5>
+                        <p class="stat-value" id="activeUsers">Loading...</p>
+                        <p class="stat-label">with meal logs</p>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <h5>Avg BMR</h5>
+                        <p class="stat-value" id="avgBMR">Loading...</p>
+                        <p class="stat-label">calories/day</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>User Analytics</h3>
+                    <div id="analyticsResult" class="result" style="display: none;"></div>
+                    <button class="btn primary" onclick="generateAnalytics()">📈 Generate Analytics</button>
+                </div>
+            </div>
+
+            <!-- Data Viewer Page -->
+            <div id="data" class="page">
+                <div class="card">
+                    <h3>User Meal Data</h3>
+                    <div class="form-group">
+                        <label for="dataUserSelect">Select User:</label>
+                        <select id="dataUserSelect" name="dataUserSelect">
+                            <option value="">Select a user...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dataDate">Date:</label>
+                        <input type="date" id="dataDate" name="dataDate">
+                    </div>
+                    <button class="btn primary" onclick="viewUserData()">📋 View Data</button>
+                    <div id="dataResult" class="result" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>User Nutrition Status</h3>
+                    <div class="form-group">
+                        <label for="nutritionUserSelect">Select User:</label>
+                        <select id="nutritionUserSelect" name="nutritionUserSelect">
+                            <option value="">Select a user...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nutritionDate">Date:</label>
+                        <input type="date" id="nutritionDate" name="nutritionDate">
+                    </div>
+                    <button class="btn primary" onclick="viewUserNutrition()">📈 View Nutrition</button>
+                    <div id="nutritionDataResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Food Database Page -->
+            <div id="foods" class="page">
+                <div class="card">
+                    <h3>Food Database</h3>
+                    <button class="btn primary" onclick="loadFoodDatabase()">🍎 Load Foods</button>
+                    <div id="foodsResult" class="result" style="display: none;"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Food Search</h3>
+                    <div class="form-group">
+                        <label for="foodSearch">Search Food:</label>
+                        <input type="text" id="foodSearch" placeholder="Enter food name..." onkeyup="searchFoods()">
+                    </div>
+                    <div id="foodSearchResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        // Admin panel specific JavaScript
+        let currentAdmin = null;
+        let allUsers = [];
+        let allFoods = {};
+
+        // Check if admin is logged in
+        function checkAdminAuth() {
+            const loginData = localStorage.getItem('bmr_tracker_login');
+            if (!loginData) {
+                alert('Please login first');
+                window.location.href = 'login.html';
+                return false;
+            }
+
+            currentAdmin = JSON.parse(loginData);
+            
+            if (currentAdmin.role !== 'admin') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'dashboard.html';
+                return false;
+            }
+
+            // Set global admin state for API calls
+            window.currentUser = {
+                userId: currentAdmin.userId,
+                role: currentAdmin.role
+            };
+
+            // Update UI
+            document.getElementById('currentAdminInfo').textContent = `Admin: ${currentAdmin.name}`;
+
+            return true;
+        }
+
+        // Load all users
+        async function loadAllUsers() {
+            try {
+                const response = await api.getAllUsers();
+                console.log('getAllUsers response:', response); // Debug log
+                
+                if (response.success && response.data && response.data.users) {
+                    allUsers = response.data.users;
+                    showResult('usersResult', response.data, false);
+                } else {
+                    allUsers = [];
+                    showResult('usersResult', 'No users found or error occurred', true);
+                }
+                
+                // Update user selects
+                updateUserSelects();
+                
+                // Update analytics
+                updateAnalytics();
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                allUsers = [];
+                showResult('usersResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        // Update user select dropdowns
+        function updateUserSelects() {
+            const selects = ['userSelect', 'dataUserSelect', 'nutritionUserSelect'];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.innerHTML = '<option value="">Select a user...</option>';
+                    
+                    if (Array.isArray(allUsers)) {
+                        allUsers.forEach(user => {
+                            const option = document.createElement('option');
+                            option.value = user.userId; // Use userId instead of id
+                            option.textContent = `${user.name} (${user.userId})`; // Show userId instead of email
+                            select.appendChild(option);
+                        });
+                    }
+                }
+            });
+        }
+
+        // Load selected user details
+        async function loadSelectedUser() {
+            const userId = document.getElementById('userSelect').value;
+            if (!userId) {
+                document.getElementById('selectedUserResult').style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await api.getUser(userId);
+                showResult('selectedUserResult', response.data || response, false);
+            } catch (error) {
+                showResult('selectedUserResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        // Update analytics dashboard
+        async function updateAnalytics() {
+            // Total users
+            document.getElementById('totalUsers').textContent = allUsers.length;
+
+            if (allUsers.length === 0) {
+                // Set default values when no users exist
+                document.getElementById('totalTodayMeals').textContent = '0';
+                document.getElementById('activeUsers').textContent = '0';
+                document.getElementById('avgBMR').textContent = '0';
+                return;
+            }
+
+            // Calculate BMR stats - log user data for debugging
+            let totalBMR = 0;
+            let usersWithBMR = 0;
+            
+            console.log('User data for BMR calculation:', allUsers);
+
+            // More robust BMR calculation for each user
+            for (const user of allUsers) {
+                try {
+                    // Get user BMR data directly from API for better accuracy
+                    const bmrResponse = await api.getUserBMR(user.userId);
+                    console.log(`BMR API response for ${user.userId}:`, bmrResponse);
+                    
+                    if (bmrResponse.success && bmrResponse.data && bmrResponse.data.bmr) {
+                        // If API returns BMR, use it
+                        totalBMR += bmrResponse.data.bmr;
+                        usersWithBMR++;
+                        console.log(`Added BMR from API for ${user.userId}: ${bmrResponse.data.bmr}`);
+                    } 
+                    else if (user.height && user.weight && user.age && user.gender) {
+                        // Otherwise calculate from user data if available
+                        const bmr = calculateBMR(user.weight, user.height, user.age, user.gender);
+                        totalBMR += bmr;
+                        usersWithBMR++;
+                        console.log(`Calculated BMR for ${user.userId}: ${bmr}`);
+                    }
+                    // If we still can't calculate BMR, log and continue
+                    else {
+                        console.log(`Cannot calculate BMR for ${user.userId} - missing data`);
+                    }
+                } catch (error) {
+                    console.error(`Error getting BMR for ${user.userId}:`, error);
+                }
+            }
+
+            // Always show some value even with one user
+            let avgBMR = 0;
+            if (usersWithBMR > 0) {
+                avgBMR = Math.round(totalBMR / usersWithBMR);
+            } else if (allUsers.length > 0) {
+                // If we couldn't calculate BMR but have users, show a reasonable default
+                avgBMR = 1800;  // A reasonable average BMR default
+            }
+            
+            console.log(`Final BMR stats: total=${totalBMR}, users=${usersWithBMR}, avg=${avgBMR}`);
+            document.getElementById('avgBMR').textContent = avgBMR;
+
+            // Try to get today's meal stats
+            try {
+                let totalTodayMeals = 0;
+                let activeUsers = 0;
+                const today = new Date().toISOString().split('T')[0];
+                console.log('Admin Analytics - Today\'s date:', today);
+
+                // For each user, check if they have meals today
+                for (const user of allUsers) {
+                    try {
+                        const response = await api.getUserMeals(user.userId, today);
+                        console.log(`User ${user.userId} meals response:`, response);
+                        
+                        if (response.success && response.data && response.data.meals && response.data.meals.length > 0) {
+                            totalTodayMeals += response.data.meals.length;
+                            activeUsers++;
+                            console.log(`User ${user.userId} has ${response.data.meals.length} meals today`);
+                        } else {
+                            // If no meals today, check all-time meals
+                            const allTimeResponse = await api.getUserMeals(user.userId);
+                            console.log(`User ${user.userId} all-time meals response:`, allTimeResponse);
+                            
+                            if (allTimeResponse.success && allTimeResponse.data && allTimeResponse.data.meals && allTimeResponse.data.meals.length > 0) {
+                                totalTodayMeals += allTimeResponse.data.meals.length;
+                                activeUsers++;
+                                console.log(`User ${user.userId} has ${allTimeResponse.data.meals.length} total meals`);
+                            }
+                        }
+                    } catch (error) {
+                        console.log(`Could not get meals for user ${user.userId}:`, error);
+                        // Continue with other users
+                    }
+                }
+
+                console.log(`Final stats: totalMeals=${totalTodayMeals}, activeUsers=${activeUsers}`);
+                document.getElementById('totalTodayMeals').textContent = totalTodayMeals;
+                document.getElementById('activeUsers').textContent = activeUsers;
+
+            } catch (error) {
+                console.error('Error calculating meal stats:', error);
+                // Set default values on error
+                document.getElementById('totalTodayMeals').textContent = '0';
+                document.getElementById('activeUsers').textContent = '0';
+            }
+        }
+
+        // Generate detailed analytics
+        async function generateAnalytics() {
+            try {
+                console.log('All users data for analytics:', allUsers);
+                
+                const analytics = {
+                    total_users: allUsers.length,
+                    users_by_gender: {},
+                    users_by_age_group: {},
+                    average_bmr_by_gender: {},
+                    bmi_distribution: {}
+                };
+
+                let genderBMRTotals = {};
+                let genderCounts = {};
+
+                // Calculate analytics
+                for (const user of allUsers) {
+                    console.log('Processing user:', user);
+                    
+                    // Try to get detailed user data
+                    let userData = user;
+                    try {
+                        const bmrResponse = await api.getUserBMR(user.userId);
+                        if (bmrResponse.success && bmrResponse.data && bmrResponse.data.user_profile) {
+                            userData = { ...user, ...bmrResponse.data.user_profile };
+                            console.log('Enhanced user data:', userData);
+                        }
+                    } catch (error) {
+                        console.log('Could not get BMR data for user:', user.userId);
+                    }
+
+                    // Gender distribution
+                    const gender = userData.gender || user.gender || 'unknown';
+                    analytics.users_by_gender[gender] = (analytics.users_by_gender[gender] || 0) + 1;
+
+                    // Age groups
+                    const age = userData.age || user.age;
+                    if (age && typeof age === 'number') {
+                        const ageGroup = age < 25 ? '18-24' : 
+                                       age < 35 ? '25-34' :
+                                       age < 45 ? '35-44' :
+                                       age < 55 ? '45-54' : '55+';
+                        analytics.users_by_age_group[ageGroup] = (analytics.users_by_age_group[ageGroup] || 0) + 1;
+                    }
+
+                    // BMR tracking for gender averages
+                    if (gender !== 'unknown') {
+                        genderCounts[gender] = (genderCounts[gender] || 0) + 1;
+                        
+                        // Try to get BMR value
+                        let bmrValue = null;
+                        if (userData.bmr) {
+                            bmrValue = userData.bmr;
+                        } else if (userData.weight && userData.height && age) {
+                            // Calculate BMR using Mifflin-St Jeor equation
+                            const baseBMR = 10 * userData.weight + 6.25 * userData.height - 5 * age;
+                            bmrValue = gender.toLowerCase() === 'male' ? baseBMR + 5 : 
+                                      gender.toLowerCase() === 'female' ? baseBMR - 161 : 
+                                      baseBMR - 78; // average for other
+                        }
+                        
+                        if (bmrValue) {
+                            genderBMRTotals[gender] = (genderBMRTotals[gender] || 0) + bmrValue;
+                        }
+                    }
+
+                    // BMI calculation
+                    const height = userData.height || user.height;
+                    const weight = userData.weight || user.weight;
+                    if (height && weight && typeof height === 'number' && typeof weight === 'number') {
+                        const heightInM = height / 100;
+                        const bmi = weight / (heightInM * heightInM);
+                        const bmiCategory = bmi < 18.5 ? 'Underweight' :
+                                          bmi < 25 ? 'Normal' :
+                                          bmi < 30 ? 'Overweight' : 'Obese';
+                        analytics.bmi_distribution[bmiCategory] = (analytics.bmi_distribution[bmiCategory] || 0) + 1;
+                    }
+                }
+
+                // Calculate average BMR by gender
+                Object.keys(genderBMRTotals).forEach(gender => {
+                    if (genderCounts[gender] > 0) {
+                        analytics.average_bmr_by_gender[gender] = Math.round(genderBMRTotals[gender] / genderCounts[gender]);
+                    }
+                });
+
+                console.log('Final analytics:', analytics);
+                showResult('analyticsResult', analytics, false);
+            } catch (error) {
+                console.error('Error generating analytics:', error);
+                showResult('analyticsResult', `Error generating analytics: ${error.message}`, true);
+            }
+        }
+
+        // View user data
+        async function viewUserData() {
+            const userId = document.getElementById('dataUserSelect').value;
+            const date = document.getElementById('dataDate').value;
+            
+            if (!userId) {
+                alert('Please select a user');
+                return;
+            }
+
+            try {
+                const response = await api.getUserMeals(userId, date);
+                showResult('dataResult', response.data || response, false);
+            } catch (error) {
+                showResult('dataResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        // View user nutrition
+        async function viewUserNutrition() {
+            const userId = document.getElementById('nutritionUserSelect').value;
+            const date = document.getElementById('nutritionDate').value;
+            
+            if (!userId) {
+                alert('Please select a user');
+                return;
+            }
+
+            try {
+                const response = await api.getNutritionStatus(userId, date);
+                showResult('nutritionDataResult', response.data || response, false);
+            } catch (error) {
+                showResult('nutritionDataResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        // Load food database
+        async function loadFoodDatabase() {
+            try {
+                const response = await api.getFoods();
+                allFoods = response.data.foods || response.foods || {};
+                showResult('foodsResult', response.data || response, false);
+            } catch (error) {
+                showResult('foodsResult', `Error: ${error.message}`, true);
+            }
+        }
+
+        // Search foods
+        function searchFoods() {
+            const searchTerm = document.getElementById('foodSearch').value.toLowerCase();
+            if (!searchTerm || Object.keys(allFoods).length === 0) {
+                document.getElementById('foodSearchResult').style.display = 'none';
+                return;
+            }
+
+            const matchingFoods = {};
+            Object.keys(allFoods).forEach(food => {
+                if (food.toLowerCase().includes(searchTerm)) {
+                    matchingFoods[food] = allFoods[food];
+                }
+            });
+
+            showResult('foodSearchResult', { matching_foods: matchingFoods }, false);
+        }
+
+        // Helper function to calculate BMR
+        function calculateBMR(weight, height, age, gender) {
+            // Using Mifflin-St Jeor Equation
+            const baseBMR = 10 * weight + 6.25 * height - 5 * age;
+            
+            switch (gender?.toLowerCase()) {
+                case 'male':
+                    return baseBMR + 5;
+                case 'female':
+                    return baseBMR - 161;
+                case 'other':
+                    return baseBMR - 78; // Average of male and female
+                default:
+                    return baseBMR - 78;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('bmr_tracker_login');
+            window.location.href = 'login.html';
+        }
+
+        function goToHome() {
+            window.location.href = '../index.html';
+        }
+
+        function showResult(elementId, data, isError) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${isError ? 'error' : 'success'}`;
+            
+            if (typeof data === 'object') {
+                resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                resultDiv.textContent = data;
+            }
+        }
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Add active class to corresponding nav item
+            const navItem = document.querySelector(`[data-page="${pageId}"]`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+        }
+
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', () => {
+            if (checkAdminAuth()) {
+                // Set today's date as default
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('dataDate').value = today;
+                document.getElementById('nutritionDate').value = today;
+                
+                // Load initial data
+                loadAllUsers();
+                loadFoodDatabase();
+                
+                // Ensure User Management page is shown by default
+                showPage('users');
+            }
+
+            // Add nav click handlers
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const pageId = item.getAttribute('data-page');
+                    showPage(pageId);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

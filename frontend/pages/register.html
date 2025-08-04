@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMR Tracker - Register</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🍽️ BMR Tracker Registration</h1>
+            <p>Create your account to start tracking your nutrition and fitness goals</p>
+        </header>
+
+        <!-- Registration Form -->
+        <main class="content">
+            <div class="register-page">
+                <div class="card">
+                    <h3>Create Your Account</h3>
+                    
+                    <form id="registerForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="name">Full Name *</label>
+                                <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" placeholder="Enter your email (optional)">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="age">Age (years) *</label>
+                                <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter your age" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="weight">Weight (kg) *</label>
+                                <input type="number" id="weight" name="weight" step="0.1" min="1" placeholder="Enter weight in kg" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="height">Height (cm) *</label>
+                                <input type="number" id="height" name="height" step="0.1" min="50" placeholder="Enter height in cm" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="gender">Gender *</label>
+                                <select id="gender" name="gender" required>
+                                    <option value="">Select gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="activity_level">Activity Level *</label>
+                                <select id="activity_level" name="activity_level" required>
+                                    <option value="sedentary">Sedentary (little/no exercise)</option>
+                                    <option value="light">Light (light exercise 1-3 days/week)</option>
+                                    <option value="moderate" selected>Moderate (moderate exercise 3-5 days/week)</option>
+                                    <option value="active">Active (hard exercise 6-7 days/week)</option>
+                                    <option value="very_active">Very Active (very hard exercise, physical job)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="goal">Fitness Goal *</label>
+                                <select id="goal" name="goal" required>
+                                    <option value="maintain">Maintain Weight</option>
+                                    <option value="lose_weight">Lose Weight</option>
+                                    <option value="gain_weight">Gain Weight</option>
+                                    <option value="build_muscle">Build Muscle</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn primary" onclick="registerUser()">
+                                👤 Create Account
+                            </button>
+                            <button type="button" class="btn secondary" onclick="goToLogin()">
+                                🔐 Already have an account? Login
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="registerResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+        // Registration page specific JavaScript
+        async function registerUser() {
+            try {
+                // Get form data
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim() || null,
+                    age: parseInt(document.getElementById('age').value),
+                    weight: parseFloat(document.getElementById('weight').value),
+                    height: parseFloat(document.getElementById('height').value),
+                    gender: document.getElementById('gender').value,
+                    activity_level: document.getElementById('activity_level').value,
+                    goal: document.getElementById('goal').value
+                };
+
+                // Basic validation
+                if (!formData.name || !formData.age || !formData.weight || !formData.height || !formData.gender) {
+                    showResult('Please fill in all required fields.', 'error');
+                    return;
+                }
+
+                showResult('Creating your account...', 'info');
+                
+                const response = await api.registerUser(formData);
+                const responseData = response.data || response;
+                
+                if (responseData.userId) {
+                    showResult(`Account created successfully! Your User ID is: ${responseData.userId}`, 'success');
+                    
+                    // Store registration info
+                    const registrationData = {
+                        userId: responseData.userId,
+                        name: formData.name,
+                        registeredAt: new Date().toISOString()
+                    };
+                    
+                    localStorage.setItem('bmr_tracker_registration', JSON.stringify(registrationData));
+                    
+                    // Clear form
+                    document.getElementById('registerForm').reset();
+                    
+                    // Auto-redirect to login after 3 seconds
+                    setTimeout(() => {
+                        showResult('Redirecting to login page...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 1000);
+                    }, 2000);
+                } else {
+                    showResult('Registration failed. Please try again.', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                showResult(`Registration failed: ${error.message}`, 'error');
+            }
+        }
+
+        function goToLogin() {
+            window.location.href = 'login.html';
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+
+        // Auto-focus on name field
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('name').focus();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMR Tracker - Meal & Nutrition Management</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🍽️ BMR Tracker</h1>
+            <p>Complete Meal & Nutrition Management System</p>
+            <div class="auth-status" id="authStatus">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </header>
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="hero">
+                <h2>Track Your Nutrition Journey</h2>
+                <p>Calculate your BMR, log meals, and monitor your nutrition intake with our comprehensive tracking system.</p>
+            </div>
+
+            <!-- Quick Access Cards -->
+            <div class="quick-access">
+                <div class="access-card" onclick="goToLogin()">
+                    <div class="card-icon">🔐</div>
+                    <h3>User Login</h3>
+                    <p>Access your personal dashboard to track meals and nutrition</p>
+                    <button class="btn primary">Login</button>
+                </div>
+
+                <div class="access-card" onclick="goToRegister()">
+                    <div class="card-icon">👤</div>
+                    <h3>New User</h3>
+                    <p>Create a new account to start tracking your nutrition journey</p>
+                    <button class="btn secondary">Register</button>
+                </div>
+
+                <div class="access-card" onclick="goToAdmin()">
+                    <div class="card-icon">👑</div>
+                    <h3>Admin Panel</h3>
+                    <p>Manage users and view system analytics</p>
+                    <button class="btn admin">Admin Access</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features-section">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">💪</div>
+                    <h4>BMR Calculator</h4>
+                    <p>Calculate your Basal Metabolic Rate based on your personal information</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">🍽️</div>
+                    <h4>Meal Logging</h4>
+                    <p>Log your daily meals with our comprehensive food database</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <h4>Nutrition Tracking</h4>
+                    <p>Monitor your daily calorie and nutrient intake</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">📈</div>
+                    <h4>Progress Analytics</h4>
+                    <p>View detailed analytics and track your nutrition progress</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">👥</div>
+                    <h4>User Management</h4>
+                    <p>Admin tools for managing users and system data</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <h4>Secure Access</h4>
+                    <p>Role-based access control to protect user data</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legacy API Testing Section (Hidden by default) -->
+        <div id="legacySection" style="display: none;">
+            <div class="section-header">
+                <h2>API Testing Interface</h2>
+                <button class="btn secondary" onclick="toggleLegacySection()">Hide Legacy Interface</button>
+            </div>
+
+            <!-- Current User Display -->
+            <div id="currentUserDisplay">
+                <div class="user-controls">
+                    <div class="auth-info">
+                        <span>Role: <strong id="currentRole">user</strong></span>
+                        <span>User ID: <strong id="currentUserId">user1</strong></span>
+                        <span id="loggedInUser" style="display: none;">Logged in as: <strong id="loggedInUserName"></strong></span>
+                    </div>
+                    <div class="auth-controls">
+                        <button class="btn secondary" onclick="switchRole()">Switch Role</button>
+                        <input type="text" id="userIdInput" placeholder="Enter User ID" style="width: 120px;">
+                        <button class="btn secondary" onclick="setUserId()">Set User ID</button>
+                        <button class="btn primary" onclick="showLoginModal()">Login as User</button>
+                        <button class="btn secondary" onclick="logout()" id="logoutBtn" style="display: none;">Logout</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Modal -->
+            <div id="loginModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closeLoginModal()">&times;</span>
+                    <h3>Login as User</h3>
+                    <div class="form-group">
+                        <label for="loginUserId">Select User:</label>
+                        <select id="loginUserId" class="user-selector">
+                            <option value="">Select a user</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="adminLogin"> Login as Admin
+                        </label>
+                </div>
+                <button class="btn primary" onclick="performLogin()">Login</button>
+                <button class="btn secondary" onclick="closeLoginModal()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-item active" data-page="register">👤 Register User</button>
+            <button class="nav-item" data-page="dashboard" id="dashboardTab" style="display: none;">🏠 Dashboard</button>
+            <button class="nav-item" data-page="admin" id="adminTab" style="display: none;">👑 Admin Panel</button>
+            <button class="nav-item" data-page="bmr">📊 Check BMR</button>
+            <button class="nav-item" data-page="meal">🍽️ Log Meal</button>
+            <button class="nav-item" data-page="status">📈 Nutrition Status</button>
+            <button class="nav-item" data-page="webhook">🔗 Webhook Test</button>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="content">
+            <!-- Register User Page -->
+            <div id="register" class="page active">
+                <div class="card">
+                    <h3>Register New User</h3>
+                    <form id="registerForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email (optional)</label>
+                                <input type="email" id="email" name="email" placeholder="Enter your email">
+                            </div>
+                            <div class="form-group">
+                                <label for="age">Age (years)</label>
+                                <input type="number" id="age" name="age" min="1" max="120" placeholder="Enter your age" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="weight">Weight (kg)</label>
+                                <input type="number" id="weight" name="weight" step="0.1" min="1" placeholder="Enter weight in kg" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="height">Height (cm)</label>
+                                <input type="number" id="height" name="height" step="0.1" min="50" placeholder="Enter height in cm" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select id="gender" name="gender" required>
+                                    <option value="">Select gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="activity_level">Activity Level</label>
+                                <select id="activity_level" name="activity_level" required>
+                                    <option value="sedentary">Sedentary (little/no exercise)</option>
+                                    <option value="light">Light (light exercise 1-3 days/week)</option>
+                                    <option value="moderate" selected>Moderate (moderate exercise 3-5 days/week)</option>
+                                    <option value="active">Active (hard exercise 6-7 days/week)</option>
+                                    <option value="very_active">Very Active (very hard exercise, physical job)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="goal">Fitness Goal</label>
+                                <select id="goal" name="goal" required>
+                                    <option value="maintain">Maintain Weight</option>
+                                    <option value="lose_weight">Lose Weight</option>
+                                    <option value="gain_weight">Gain Weight</option>
+                                    <option value="build_muscle">Build Muscle</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" class="btn" onclick="registerUser()">
+                            👤 Register User
+                        </button>
+                    </form>
+                    <div id="registerResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- User Dashboard Page -->
+            <div id="dashboard" class="page">
+                <div class="card">
+                    <h3>User Dashboard</h3>
+                    <div id="userDashboardContent">
+                        <p>Please login to view your dashboard.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Panel Page -->
+            <div id="admin" class="page">
+                <div class="card">
+                    <h3>Admin Panel</h3>
+                    <div id="adminPanelContent">
+                        <div class="admin-section">
+                            <h4>User Management</h4>
+                            <div class="form-group">
+                                <label for="adminUserSelect">Select User:</label>
+                                <select id="adminUserSelect" class="user-selector">
+                                    <option value="">Select a user</option>
+                                </select>
+                            </div>
+                            <div class="admin-actions">
+                                <button class="btn primary" onclick="adminViewUserBMR()">View BMR</button>
+                                <button class="btn primary" onclick="adminViewUserMeals()">View Meals</button>
+                                <button class="btn primary" onclick="adminViewUserNutrition()">View Nutrition</button>
+                                <button class="btn secondary" onclick="adminViewAllUsers()">View All Users</button>
+                            </div>
+                        </div>
+                        <div id="adminResults" class="result" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BMR Check Page -->
+            <div id="bmr" class="page">
+                <div class="card">
+                    <h3>Check BMR (Basal Metabolic Rate)</h3>
+                    <div class="form-group">
+                        <label for="bmrUserId">Select User</label>
+                        <select id="bmrUserId" class="user-selector" required>
+                            <option value="">Select a user</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn" onclick="getBMR()">
+                        📊 Calculate BMR
+                    </button>
+                    <div id="bmrResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Meal Logging Page -->
+            <div id="meal" class="page">
+                <div class="card">
+                    <h3>Log Your Meal</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="mealUserId">Select User</label>
+                            <select id="mealUserId" class="user-selector" required>
+                                <option value="">Select a user</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mealType">Meal Type</label>
+                            <select id="mealType" required>
+                                <option value="breakfast">🌅 Breakfast</option>
+                                <option value="lunch">☀️ Lunch</option>
+                                <option value="dinner">🌙 Dinner</option>
+                                <option value="snack">🍿 Snack</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mealItems">Food Items (comma separated)</label>
+                        <textarea id="mealItems" rows="3" placeholder="e.g., Jeera Rice, Dal, Cucumber Salad" required></textarea>
+                    </div>
+                    <button type="button" class="btn" onclick="logMeal()">
+                        🍽️ Log Meal
+                    </button>
+                    <button type="button" class="btn secondary" onclick="showAvailableFoods()">
+                        📋 Show Available Foods
+                    </button>
+                    <div id="mealResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Nutrition Status Page -->
+            <div id="status" class="page">
+                <div class="card">
+                    <h3>Nutrition Status & Meal History</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="statusUserId">Select User</label>
+                            <select id="statusUserId" class="user-selector" required>
+                                <option value="">Select a user</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="statusDate">Date (optional)</label>
+                            <input type="date" id="statusDate" placeholder="Leave empty for all-time data">
+                        </div>
+                    </div>
+                    <button type="button" class="btn" onclick="getNutritionStatus()">
+                        📈 Get Nutrition Status
+                    </button>
+                    <button type="button" class="btn secondary" onclick="getUserMeals()">
+                        📋 Get Meal History
+                    </button>
+                    <div id="statusResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Webhook Test Page -->
+            <div id="webhook" class="page">
+                <div class="card">
+                    <h3>Webhook Meal Logging Test</h3>
+                    <p>Test the webhook endpoint that simulates WhatsApp/Google Chat meal logging.</p>
+                    <div class="form-group">
+                        <label for="webhookUserId">Select User</label>
+                        <select id="webhookUserId" class="user-selector" required>
+                            <option value="">Select a user</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="webhookMessage">Webhook Message</label>
+                        <textarea id="webhookMessage" rows="3" placeholder="log lunch: Jeera Rice, Dal, Cucumber" required></textarea>
+                        <small>Format: log [meal_type]: [food1], [food2], [food3]</small>
+                    </div>
+                    <button type="button" class="btn" onclick="testWebhook()">
+                        🔗 Send Webhook
+                    </button>
+                    <div id="webhookResult" class="result" style="display: none;"></div>
+                    
+                    <div class="mt-3">
+                        <h4>Example Messages:</h4>
+                        <ul>
+                            <li><code>log breakfast: Poha, Chai</code></li>
+                            <li><code>log lunch: Jeera Rice, Dal, Cucumber</code></li>
+                            <li><code>log dinner: Roti, Chicken Curry, Mixed Vegetables</code></li>
+                            <li><code>log snack: Apple, Nuts</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 BMR Tracker. A comprehensive nutrition management system.</p>
+            <button class="btn secondary small" onclick="toggleLegacySection()">Show Legacy API Interface</button>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Navigation functions
+        function goToLogin() {
+            window.location.href = 'pages/login.html';
+        }
+
+        function goToRegister() {
+            window.location.href = 'pages/register.html';
+        }
+
+        function goToAdmin() {
+            // Check if user is already logged in as admin
+            const loginData = localStorage.getItem('bmr_tracker_login');
+            if (loginData) {
+                const user = JSON.parse(loginData);
+                if (user.role === 'admin') {
+                    window.location.href = 'pages/admin.html';
+                    return;
+                }
+            }
+            
+            // If not logged in as admin, go to login page
+            window.location.href = 'pages/login.html';
+        }
+
+        // Toggle legacy section
+        function toggleLegacySection() {
+            const legacySection = document.getElementById('legacySection');
+            const isHidden = legacySection.style.display === 'none';
+            legacySection.style.display = isHidden ? 'block' : 'none';
+            
+            const button = event.target;
+            button.textContent = isHidden ? 'Hide Legacy Interface' : 'Show Legacy API Interface';
+        }
+
+        // Check authentication status
+        function checkAuthStatus() {
+            const loginData = localStorage.getItem('bmr_tracker_login');
+            const authStatus = document.getElementById('authStatus');
+            
+            if (loginData) {
+                const user = JSON.parse(loginData);
+                authStatus.innerHTML = `
+                    <div class="logged-in-status">
+                        <span>Logged in as: <strong>${user.name}</strong> (${user.role})</span>
+                        <button class="btn small secondary" onclick="goToDashboard()">Go to Dashboard</button>
+                        <button class="btn small secondary" onclick="logout()">Logout</button>
+                    </div>
+                `;
+            } else {
+                authStatus.innerHTML = `
+                    <div class="not-logged-in">
+                        <span>Not logged in</span>
+                        <button class="btn small primary" onclick="goToLogin()">Login</button>
+                    </div>
+                `;
+            }
+        }
+
+        function goToDashboard() {
+            const loginData = localStorage.getItem('bmr_tracker_login');
+            if (loginData) {
+                const user = JSON.parse(loginData);
+                if (user.role === 'admin') {
+                    window.location.href = 'pages/admin.html';
+                } else {
+                    window.location.href = 'pages/dashboard.html';
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('bmr_tracker_login');
+            checkAuthStatus();
+            alert('Logged out successfully');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthStatus();
+        });
+    </script>
+</body>
+</html>
