@@ -17,24 +17,62 @@ A comprehensive web application for tracking meals, calculating BMR (Basal Metab
 ### Prerequisites
 - Python 3.8+
 - Modern web browser
+- Git
 
 ### Installation & Setup
 
-1. **Clone and setup**
+1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/niweshbaraj/meal-metrics.git
 cd meal-metrics
+```
+
+2. **Environment Setup (Choose one method)**
+
+#### Option A: Using UV (Recommended - Faster)
+```bash
+# Install uv if you haven't already
+pip install uv
+
+# Activate virtual environment (if using uv venv)
+uv venv
+# On Windows
+.venv\Scripts\activate
+# On macOS/Linux
+source .venv/bin/activate
+
+# Install dependencies
+uv pip install -r requirements.txt
+```
+
+#### Option B: Using pip
+```bash
+# Create virtual environment (recommended)
+python -m venv .venv
+
+# Activate virtual environment
+# On Windows
+.venv\Scripts\activate
+# On macOS/Linux
+source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-2. **Start the backend**
+3. **Start the backend server**
 ```bash
-uvicorn api.main:app --reload
+# Using uvicorn directly
+uvicorn app.main:app --reload
+
+# Or if using the main.py in root
+python main.py
 ```
 
-3. **Access the application**
-- **Frontend**: Open `frontend/index.html` in your browser
+4. **Access the application**
+- **Frontend**: http://127.0.0.1:8000/frontend/index.html (or open `frontend/index.html` in your browser)
 - **API Documentation**: http://127.0.0.1:8000/docs
+- **ReDoc Documentation**: http://127.0.0.1:8000/redoc
 - **API Base URL**: http://127.0.0.1:8000/api/v1
 
 ## 📁 Project Structure
