@@ -128,7 +128,7 @@ meal-metrics/
    ```
    TELEGRAM_BOT_TOKEN=your_bot_token_here
    ```
-4. After deployment, set webhook (replace `your-app-name` with actual app name):
+4. After deployment, set webhook (replace {YOUR_BOT_TOKEN} and your-app-name):
    ```bash
    curl -X POST "https://api.telegram.org/bot{YOUR_BOT_TOKEN}/setWebhook" \
      -H "Content-Type: application/json" \

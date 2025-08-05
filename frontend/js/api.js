@@ -1,6 +1,6 @@
 // Configuration
 const CONFIG = {
-    API_BASE: 'http://127.0.0.1:8000/api/v1',
+    API_BASE: window.location.origin + '/api/v1', // Use current domain for API calls
     USER_API_KEY: 'SECRET_API_KEY',
     ADMIN_API_KEY: 'ADMIN_API_KEY'
 };
