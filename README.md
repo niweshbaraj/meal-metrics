@@ -114,6 +114,9 @@ meal-metrics/
 **Webhook Integration**
 ![Webhook Integration](screenshots/image-5.png)
 
+**Telegram Bot Webhook Integration**
+![Webhook Integration](screenshots/image-7.png)
+
 ## 🤖 Telegram Bot Setup
 
 ### 1. Create Bot
