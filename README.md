@@ -1,6 +1,6 @@
 # 🍽️ BMR Tracker - Meal & Nutrition Management System
 
-A comprehensive web application for tracking meals, calculating BMR (Basal Metabolic Rate), and monitoring nutritional intake. Built with FastAPI backend and vanilla JavaScript frontend.
+A comprehensive nutrition tracking system with BMR calculation, meal logging, and multiple integration options including Telegram bot. Built with FastAPI backend and vanilla JavaScript frontend.
 
 ## 🌐 Live Demo
 
@@ -8,157 +8,171 @@ A comprehensive web application for tracking meals, calculating BMR (Basal Metab
 
 - **🎯 Frontend App**: [Launch Application](https://meal-metrics-api.onrender.com/frontend/index.html#register)
 - **📖 API Documentation**: [Interactive API Docs](https://meal-metrics-api.onrender.com/docs)
-- **📝 ReDoc**: [Alternative API Docs](https://meal-metrics-api.onrender.com/redoc)
 
-## ✨ Features
+## ✨ Key Features
 
-- **User Management**: Register users with profile data and BMR calculation
+- **User Management**: Register users with BMR calculation (Mifflin-St Jeor equation)
 - **Meal Logging**: Log meals with automatic nutrition calculation  
 - **Nutrition Tracking**: Monitor calories, protein, carbs, and fiber intake
 - **Dashboard**: Personal nutrition dashboard with daily stats
 - **Admin Panel**: User management and analytics
-- **Webhook Integration**: Meal logging via chat-like interface
+- **Webhook Integration**: Chat-like meal logging interface
+- **Telegram Bot**: Log meals directly from Telegram
 - **Food Database**: 30+ Indian foods with complete nutrition data
 
-## 🚀 Quick Start
+## 🔌 API Endpoints
+
+### User Management
+- `POST /api/v1/users/register` - Register new user with BMR calculation
+- `GET /api/v1/users/{user_id}` - Get user profile and BMR data
+- `PUT /api/v1/users/{user_id}` - Update user profile (recalculates BMR)
+- `DELETE /api/v1/users/{user_id}` - Delete user account
+- `GET /api/v1/users/` - List all users (admin only)
+
+### Meal Logging
+- `POST /api/v1/meals/log` - Log a meal with food items
+- `GET /api/v1/meals/{user_id}` - Get user's meal history
+- `GET /api/v1/meals/{user_id}/today` - Get today's meals and nutrition summary
+- `DELETE /api/v1/meals/{meal_id}` - Delete a meal entry
+
+### Nutrition & Food Database
+- `GET /api/v1/nutrition/foods` - Get complete food database with nutrition values
+- `GET /api/v1/nutrition/status/{user_id}` - Get user's nutrition status vs BMR
+- `POST /api/v1/nutrition/calculate` - Calculate nutrition for food items
+
+### Integration Endpoints
+- `POST /api/v1/webhook` - Webhook for external integrations (chat-like commands)
+- `POST /api/v1/telegram-bot/webhook` - Telegram bot webhook endpoint
+
+### Admin & Analytics
+- `GET /api/v1/admin/stats` - System statistics and user analytics
+- `GET /api/v1/admin/users` - User management dashboard data
+
+## 🚀 Quick Setup
 
 ### Prerequisites
 - Python 3.8+
-- Modern web browser
 - Git
 
-### Installation & Setup
+### Local Development
 
-1. **Clone the repository**
+1. **Clone and setup**
 ```bash
 git clone https://github.com/niweshbaraj/meal-metrics.git
 cd meal-metrics
-```
 
-2. **Environment Setup (Choose one method)**
-
-#### Option A: Using UV (Recommended - Faster)
-```bash
-# Install uv if you haven't already
-pip install uv
-
-# Activate virtual environment (if using uv venv)
-uv venv
-# On Windows
-.venv\Scripts\activate
-# On macOS/Linux
-source .venv/bin/activate
-
-# Install dependencies
+# Using UV (recommended)
+uv venv && .venv\Scripts\activate
 uv pip install -r requirements.txt
-```
 
-#### Option B: Using pip
-```bash
-# Create virtual environment (recommended)
-python -m venv .venv
-
-# Activate virtual environment
-# On Windows
-.venv\Scripts\activate
-# On macOS/Linux
-source .venv/bin/activate
-
-# Install dependencies
+# Or using pip
+python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-3. **Start the backend server**
+2. **Start the server**
 ```bash
-# Using uvicorn directly
 uvicorn api.main:app --reload
-
-# Or if using the main.py in root
-python main.py
 ```
 
-4. **Access the application**
-- **Frontend**: http://127.0.0.1:8000/frontend/index.html (or open `frontend/index.html` in your browser)
-- **API Documentation**: http://127.0.0.1:8000/docs
-- **ReDoc Documentation**: http://127.0.0.1:8000/redoc
-- **API Base URL**: http://127.0.0.1:8000/api/v1
+3. **Access the application**
+- Frontend: http://127.0.0.1:8000/frontend/index.html
+- API Docs: http://127.0.0.1:8000/docs
 
 ## 📁 Project Structure
 
 ```
 meal-metrics/
-├── api/                    # FastAPI Backend
-│   ├── main.py            # Main application entry
-│   ├── routers/           # API route handlers
-│   ├── core/              # Authentication & config
-│   ├── db/                # Data models & food database
-│   └── schemas/           # Pydantic models
-├── frontend/              # Vanilla JS Frontend
-│   ├── index.html         # Main landing page
-│   ├── pages/             # Dashboard & admin pages
-│   ├── js/                # JavaScript modules
-│   └── css/               # Stylesheets
-├── requirements.txt       # Python dependencies
-└── README.md             # This file
+├── api/                  # FastAPI backend
+│   ├── main.py          # Application entry point
+│   ├── routers/         # API endpoints
+│   ├── core/            # Authentication & config
+│   └── db/              # Data models & food database
+├── frontend/            # Vanilla JavaScript frontend
+├── screenshots/         # Application screenshots
+├── pyproject.toml      # Dependencies (includes httpx)
+└── render.yaml         # Deployment configuration
 ```
 
-## 📸 Application Screenshots
+## 📸 Screenshots
 
-### Backend API Documentation
+**API Documentation**
+![API Documentation](screenshots/image.png)
 
-**Interactive API Documentation (`/docs`)**
-![API Documentation](image.png)
-
-**Nutrition Status Endpoint Response**
-![Nutrition Status API](image-6.png)
-
-### Frontend User Interface
-
-**User Registration Page**
-![User Registration](image-1.png)
+**User Registration**
+![User Registration](screenshots/image-1.png)
 
 **Meal Logging Interface**
-![Log Meal](image-2.png)
+![Log Meal](screenshots/image-2.png)
 
-**Nutrition Status Dashboard**
-![Nutrition Status](image-3.png)
+**Nutrition Dashboard**
+![Nutrition Status](screenshots/image-3.png)
 
-**Meal History View**
-![Meal History](image-4.png)
+**Meal History**
+![Meal History](screenshots/image-4.png)
 
-**Webhook Testing Interface**
-![Webhook Integration](image-5.png)
+**Webhook Integration**
+![Webhook Integration](screenshots/image-5.png)
+
+## 🤖 Telegram Bot Setup
+
+### 1. Create Bot
+1. Message `@BotFather` on Telegram
+2. Send `/newbot` and follow instructions
+3. Copy your bot token
+
+### 2. Deploy & Configure
+1. Push your code to GitHub
+2. Deploy to Render (using blueprint or manual setup)
+3. In Render dashboard, add environment variable:
+   ```
+   TELEGRAM_BOT_TOKEN=your_bot_token_here
+   ```
+4. After deployment, set webhook (replace `your-app-name` with actual app name):
+   ```bash
+   curl -X POST "https://api.telegram.org/bot{YOUR_BOT_TOKEN}/setWebhook" \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://your-app-name.onrender.com/api/v1/telegram-bot/webhook"}'
+   ```
+
+### 3. Usage
+```
+/log user_1 lunch: rice, dal, vegetables
+/help
+```
+
+*Note: Bot requires pre-registered users for security*
+
+## 🚀 Production Deployment
+
+### One-Click Deploy (Render)
+1. Fork this repository
+2. Go to [Render Dashboard](https://dashboard.render.com/)
+3. Click "New +" → "Blueprint"
+4. Connect your forked repository
+5. Click "Apply" to deploy
+
+The `render.yaml` file handles all deployment configuration automatically.
+
+### Manual Deploy
+1. Create new Web Service on Render
+2. Connect your repository
+3. Set build command: `pip install -r requirements.txt`
+4. Set start command: `uvicorn api.main:app --host 0.0.0.0 --port $PORT`
 
 ## 🔐 Authentication
 
-Headers required for API calls:
+API endpoints require headers:
 ```bash
-user-id: your_user_id
+X-API-Key: SECRET_API_KEY    # For meal logging and admin endpoints
+user-id: your_user_id        # For user-specific operations
 ```
 
-## 🍽️ Available Foods
+## 📊 Example API Usage
 
-**Grains & Rice:** Jeera Rice, Plain Rice, Basmati Rice, Brown Rice, Roti, Chapati, Naan, Paratha
-
-**Proteins:** Various Dals (Toor, Moong, Chana), Chicken Curry, Fish Curry, Paneer, Egg
-
-**Vegetables:** Cucumber, Tomato, Onion, Potato, Carrot, Spinach
-
-**Fruits:** Apple, Banana, Orange
-
-**Snacks:** Samosa, Biscuit
-
-## 🧮 BMR Calculation
-
-Uses the **Mifflin-St Jeor Equation**:
-- **Men**: BMR = 88.362 + (13.397 × weight) + (4.799 × height) - (5.677 × age)
-- **Women**: BMR = 447.593 + (9.247 × weight) + (3.098 × height) - (4.330 × age)
-
-## � Usage Examples
-
-### 1. Register a User
+### Register User
 ```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/users/register" \
+curl -X POST "https://your-app.onrender.com/api/v1/users/register" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -170,99 +184,36 @@ curl -X POST "http://127.0.0.1:8000/api/v1/users/register" \
   }'
 ```
 
-### 2. Log a Meal
+### Log Meal
 ```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/meals/log" \
+curl -X POST "https://your-app.onrender.com/api/v1/meals/log" \
   -H "X-API-Key: SECRET_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "userId": "user_1",
     "meal": "lunch", 
-    "items": ["Jeera Rice", "Dal", "Cucumber"]
+    "items": ["rice", "dal", "vegetables"]
   }'
 ```
 
-### 3. Webhook Meal Logging
+### Webhook Integration
 ```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/webhook" \
+curl -X POST "https://your-app.onrender.com/api/v1/webhook" \
   -H "X-API-Key: SECRET_API_KEY" \
   -H "user-id: user_1" \
   -H "Content-Type: application/json" \
-  -d '{"message": "log lunch: Jeera Rice, Dal, Cucumber"}'
+  -d '{"message": "log lunch: rice, dal, vegetables"}'
 ```
 
-## 🚀 Deployment
+## 🍽️ Food Database
 
-### Local Development
-```bash
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
-```
+**Grains:** Rice varieties, Roti, Chapati, Naan, Paratha  
+**Proteins:** Various Dals, Chicken Curry, Fish Curry, Paneer, Egg  
+**Vegetables:** Cucumber, Tomato, Onion, Potato, Carrot, Spinach  
+**Fruits:** Apple, Banana, Orange  
+**Snacks:** Samosa, Biscuit  
 
-### Production (Render.com)
-
-#### Option 1: One-Click Deploy (Recommended)
-The project includes `render.yaml` for easy one-click deployment:
-
-1. **Connect Repository**
-   - Go to [Render Dashboard](https://dashboard.render.com/)
-   - Click "New +" → "Blueprint"
-   - Connect your GitHub repository (`niweshbaraj/meal-metrics`)
-   - Render will automatically detect the `render.yaml` file
-
-2. **Deploy**
-   - Click "Apply" to deploy
-   - Render will automatically build and start your application
-   - Your app will be available at: `https://meal-metrics-api.onrender.com`
-
-#### Option 2: Manual Setup
-1. **Create Web Service**
-   - Go to [Render Dashboard](https://dashboard.render.com/)
-   - Click "New +" → "Web Service"
-   - Connect your GitHub repository
-
-2. **Configure Service**
-   ```
-   Name: meal-metrics-api
-   Environment: Python
-   Build Command: pip install -r requirements.txt
-   Start Command: uvicorn api.main:app --host 0.0.0.0 --port 10000
-   ```
-
-3. **Environment Variables**
-   ```
-   PORT=10000
-   ```
-
-4. **Deploy**
-   - Click "Create Web Service"
-   - Render will build and deploy your application
-
-#### Frontend Deployment
-Since the frontend is static files, you can:
-1. **Host on same service**: The FastAPI app can serve static files
-2. **Separate static site**: Deploy frontend separately on Render as a static site
-3. **Use GitHub Pages**: Host frontend on GitHub Pages pointing to your Render API
-
-#### Access Your Deployed App
-- **🌐 Live Application**: [https://meal-metrics-api.onrender.com](https://meal-metrics-api.onrender.com)
-- **🎯 Frontend**: [https://meal-metrics-api.onrender.com/frontend/index.html](https://meal-metrics-api.onrender.com/frontend/index.html)
-- **📖 API Documentation**: [https://meal-metrics-api.onrender.com/docs](https://meal-metrics-api.onrender.com/docs)
-- **📝 ReDoc**: [https://meal-metrics-api.onrender.com/redoc](https://meal-metrics-api.onrender.com/redoc)
-- **🔗 API Base URL**: `https://meal-metrics-api.onrender.com/api/v1`
-
-## 🛠️ Development
-
-### API Testing
-- Interactive docs: http://127.0.0.1:8000/docs
-- ReDoc: http://127.0.0.1:8000/redoc
-
-### Code Quality
-```bash
-pip install black isort flake8
-black .
-isort .
-flake8 .
-```
+*Complete nutrition data available via `/api/v1/nutrition/foods` endpoint*
 
 ## 📄 License
 

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.staticfiles import StaticFiles
 from api.routers.api import api_router
+from api.routers import telegram_bot
 from api.schemas import APIInfoResponse, UserCreate
 from api.core.auth import API_KEY_NAME, USER_ID_NAME
 from fastapi.openapi.utils import get_openapi
@@ -67,6 +68,9 @@ app.add_middleware(
 
 # Include API router
 app.include_router(api_router, prefix="/api/v1")
+
+# Include Telegram bot router (separate from existing webhook)
+app.include_router(telegram_bot.router, prefix="/api/v1")
 
 # Mount static files for frontend
 frontend_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")

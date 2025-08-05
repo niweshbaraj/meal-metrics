@@ -8,6 +8,72 @@ from api.core.auth import get_current_user, check_user_access, AuthUser
 
 router = APIRouter()
 
+async def log_meal_internal(user_id: str, meal_type: str, food_items: list):
+    """
+    Internal function to log meals - used by both API endpoint and Telegram bot
+    Returns: dict with success status, nutrition data, and error message if any
+    """
+    try:
+        # Check if user exists - NO AUTO-CREATION
+        if user_id not in users_db:
+            return {
+                "success": False,
+                "error": f"User '{user_id}' not found",
+                "error_type": "user_not_found"
+            }
+        
+        # Validate food items exist in database (case-insensitive)
+        normalized_food_db = {k.lower(): k for k in food_db.keys()}
+        normalized_items = []
+        unknown_items = []
+        
+        for item in food_items:
+            item_lower = item.strip().lower()
+            if item_lower in normalized_food_db:
+                normalized_items.append(normalized_food_db[item_lower])
+            else:
+                unknown_items.append(item)
+        
+        if unknown_items:
+            return {
+                "success": False,
+                "error": f"Unknown food items: {unknown_items}",
+                "error_type": "unknown_foods"
+            }
+        
+        # Calculate nutrition for this meal using normalized food names
+        meal_nutrition = {"calories": 0, "protein": 0, "carbs": 0, "fiber": 0}
+        for item in normalized_items:
+            if item in food_db:
+                for nutrient in meal_nutrition:
+                    meal_nutrition[nutrient] += food_db[item][nutrient]
+        
+        # Store meal log with normalized food names
+        meal_entry = {
+            'userId': user_id,
+            'meal': meal_type,
+            'items': normalized_items,
+            'loggedAt': date.today(),
+            'nutrition': meal_nutrition
+        }
+        meals_db.append(meal_entry)
+        
+        # Update user activity
+        update_user_activity(user_id, "meal")
+        
+        return {
+            "success": True,
+            "nutrition": meal_nutrition,
+            "meal_details": meal_entry
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "error_type": "system_error"
+        }
+
 @router.post("/log",
           response_model=dict,
           summary="Log a user's meal",
